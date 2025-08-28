@@ -1,0 +1,171 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="File di origine">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="File di intestazione">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="File di risorse">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="File di intestazione\Utility">
+      <UniqueIdentifier>{7c7ec338-65f3-48d3-b9fc-e4754be8c6c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="File di origine\Utility">
+      <UniqueIdentifier>{def3d3cf-7b54-4e06-93b9-0e1172ecd8f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="File di intestazione\Cryptography">
+      <UniqueIdentifier>{e081d56f-3b85-40e6-84c0-0440998a90dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="File di origine\Cryptography">
+      <UniqueIdentifier>{500f148a-2443-4930-a226-eba81e5c01ec}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="framework.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="DMemory.h">
+      <Filter>File di intestazione\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="DError.h">
+      <Filter>File di intestazione\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="DUtility.h">
+      <Filter>File di intestazione\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="DBlas.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="DFormatConverter.h">
+      <Filter>File di intestazione\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="DXOROperation.h">
+      <Filter>File di intestazione\Cryptography</Filter>
+    </ClInclude>
+    <ClInclude Include="DCryptography.h">
+      <Filter>File di intestazione\Cryptography</Filter>
+    </ClInclude>
+    <ClInclude Include="DCryptoAnalysis.h">
+      <Filter>File di intestazione\Cryptography</Filter>
+    </ClInclude>
+    <ClInclude Include="DCryptoAttack.h">
+      <Filter>File di intestazione\Cryptography</Filter>
+    </ClInclude>
+    <ClInclude Include="DAESCipher.h">
+      <Filter>File di intestazione\Cryptography</Filter>
+    </ClInclude>
+    <ClInclude Include="DBlockCipher.h">
+      <Filter>File di intestazione\Cryptography</Filter>
+    </ClInclude>
+    <ClInclude Include="DCipherAlgorithm.h">
+      <Filter>File di intestazione\Cryptography</Filter>
+    </ClInclude>
+    <ClInclude Include="DCipherFile.h">
+      <Filter>File di intestazione\Cryptography</Filter>
+    </ClInclude>
+    <ClInclude Include="DAESCipherFile.h">
+      <Filter>File di intestazione\Cryptography</Filter>
+    </ClInclude>
+    <ClInclude Include="DBlockCipherFile.h">
+      <Filter>File di intestazione\Cryptography</Filter>
+    </ClInclude>
+    <ClInclude Include="DBlockPadding.h">
+      <Filter>File di intestazione\Cryptography</Filter>
+    </ClInclude>
+    <ClInclude Include="DCryptoTestTools.h">
+      <Filter>File di intestazione\Cryptography</Filter>
+    </ClInclude>
+    <ClInclude Include="DNetworkEnum.h">
+      <Filter>File di intestazione\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="DTCPv4Client.h">
+      <Filter>File di intestazione\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="DTCPv4Server.h">
+      <Filter>File di intestazione\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="DCipherSet.h">
+      <Filter>File di intestazione\Cryptography</Filter>
+    </ClInclude>
+    <ClInclude Include="DBlockCipherSet.h">
+      <Filter>File di intestazione\Cryptography</Filter>
+    </ClInclude>
+    <ClInclude Include="DAESCipherSet.h">
+      <Filter>File di intestazione\Cryptography</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DBlas.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="DMemory.cpp">
+      <Filter>File di origine\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="DError.cpp">
+      <Filter>File di origine\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="DFormatConverter.cpp">
+      <Filter>File di origine\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="DXOROperation.cpp">
+      <Filter>File di origine\Cryptography</Filter>
+    </ClCompile>
+    <ClCompile Include="DCryptoAnalysis.cpp">
+      <Filter>File di origine\Cryptography</Filter>
+    </ClCompile>
+    <ClCompile Include="DCryptoAttack.cpp">
+      <Filter>File di origine\Cryptography</Filter>
+    </ClCompile>
+    <ClCompile Include="DAESCipher.cpp">
+      <Filter>File di origine\Cryptography</Filter>
+    </ClCompile>
+    <ClCompile Include="DBlockCipher.cpp">
+      <Filter>File di origine\Cryptography</Filter>
+    </ClCompile>
+    <ClCompile Include="DCipherAlgorithm.cpp">
+      <Filter>File di origine\Cryptography</Filter>
+    </ClCompile>
+    <ClCompile Include="DCipherFile.cpp">
+      <Filter>File di origine\Cryptography</Filter>
+    </ClCompile>
+    <ClCompile Include="DAESCipherFile.cpp">
+      <Filter>File di origine\Cryptography</Filter>
+    </ClCompile>
+    <ClCompile Include="DBlockCipherFile.cpp">
+      <Filter>File di origine\Cryptography</Filter>
+    </ClCompile>
+    <ClCompile Include="DBlockPadding.cpp">
+      <Filter>File di origine\Cryptography</Filter>
+    </ClCompile>
+    <ClCompile Include="DCryptoTestTools.cpp">
+      <Filter>File di origine\Cryptography</Filter>
+    </ClCompile>
+    <ClCompile Include="DTCPv4Client.cpp">
+      <Filter>File di origine\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="DTCPv4Server.cpp">
+      <Filter>File di origine\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="DCipherSet.cpp">
+      <Filter>File di origine\Cryptography</Filter>
+    </ClCompile>
+    <ClCompile Include="DBlockCipherSet.cpp">
+      <Filter>File di origine\Cryptography</Filter>
+    </ClCompile>
+    <ClCompile Include="DAESCipherSet.cpp">
+      <Filter>File di origine\Cryptography</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
