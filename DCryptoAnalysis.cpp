@@ -483,7 +483,7 @@ uint32_t DCryptoAnalysis::get_cipher_cookie_length(string IPAddress, uint16_t Po
 	Probe.second = BlockLength;
 
 	// Riempie la sonda con il carattere A
-	memset(Probe.first, 'A', BlockLength);
+	memset(Probe.first, '.', BlockLength);
 
 	// Converte il contenuto della sonda in base64 URL
 	std::string Request = Converter.binary_to_base64(Probe, true, true).first;

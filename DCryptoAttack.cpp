@@ -5,7 +5,7 @@
 #include "DCryptoAnalysis.h"
 //---------------------------------------------------------------------------------------
 // Define
-#define DEBUG
+//#define DEBUG
 // Namespace
 using namespace std;
 using namespace blas::utility;
@@ -116,14 +116,14 @@ pair<uint8_t*, uint32_t> attack::DCryptoAttack::byte_at_a_time_to_block_cipher(s
 	Plain.first = allocate_memory<uint8_t>(Length);
 	Plain.second = Length;
 	// Il vettore è riempito temporaneamente con il carattere A
-	memset(Plain.first, 'A', Length);
+	memset(Plain.first, '.', Length);
 
 	// Dichiara e inizializza il vettore della sonda
 	std::pair<uint8_t*, uint32_t>Probe;
 	Probe.second = Length - 1;
 	Probe.first = allocate_memory<uint8_t>(Probe.second);
 	// Il vettore è riempito temporaneamente con il carattere A
-	memset(Probe.first, 'A', Probe.second);
+	memset(Probe.first, '.', Probe.second);
 
 	// Ciclo principale
 	for (uint32_t i = 0; i < Length; i++)
@@ -141,7 +141,7 @@ pair<uint8_t*, uint32_t> attack::DCryptoAttack::byte_at_a_time_to_block_cipher(s
 			std::pair<uint8_t*, uint32_t> Message = Plain + Probe;
 
 			// Converte il messaggio in base64
-			string CodedMessage = Converter.binary_to_base64(Message).first;
+			string CodedMessage = Converter.binary_to_base64(Message,true,true).first;
 
 			// Attiva la connessione
 			Client.connect(IPAddress, Port);
@@ -153,7 +153,7 @@ pair<uint8_t*, uint32_t> attack::DCryptoAttack::byte_at_a_time_to_block_cipher(s
 			string CodedAnswer = Client.read_until_close();
 
 			// Converte la risposta
-			std::pair<uint8_t*, uint32_t> Answer = Converter.base64_to_binary(CodedAnswer);
+			std::pair<uint8_t*, uint32_t> Answer = Converter.base64_to_binary(CodedAnswer,true,true);
 
 			// Seleziona i blocchi da confrontare
 			std::pair<uint8_t*, uint32_t> PlainBlock = make_pair(&Answer.first[Index1], BlockLength);
@@ -165,7 +165,7 @@ pair<uint8_t*, uint32_t> attack::DCryptoAttack::byte_at_a_time_to_block_cipher(s
 				// Libera la memoria
 				deallocate_memory(Message.first);
 				deallocate_memory(Answer.first);
-
+				cout << Char;
 				// Esce dal ciclo
 				break;
 			}
@@ -184,7 +184,8 @@ pair<uint8_t*, uint32_t> attack::DCryptoAttack::byte_at_a_time_to_block_cipher(s
 		if (i < (Length - 1))
 		{
 			// Scorre il chiaro di un posto
-			for (uint32_t i = 0; i < Plain.second - 1; i++)Plain.first[i] = Plain.first[i + 1];
+			//for (uint32_t i = 0; i < Plain.second - 1; i++)Plain.first[i] = Plain.first[i + 1];
+			memmove(Plain.first, Plain.first + 1, Plain.second - 1);
 
 			// Accorcia la sonda di un elemento
 			Probe.first[Probe.second - 1] = 0;
