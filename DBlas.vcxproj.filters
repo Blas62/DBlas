@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="File di intestazione\Utility">
-      <UniqueIdentifier>{7c7ec338-65f3-48d3-b9fc-e4754be8c6c7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="File di origine\Utility">
       <UniqueIdentifier>{def3d3cf-7b54-4e06-93b9-0e1172ecd8f1}</UniqueIdentifier>
     </Filter>
@@ -24,6 +21,9 @@
     </Filter>
     <Filter Include="File di origine\Cryptography">
       <UniqueIdentifier>{500f148a-2443-4930-a226-eba81e5c01ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="File di intestazione\Utility">
+      <UniqueIdentifier>{7c7ec338-65f3-48d3-b9fc-e4754be8c6c7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -102,6 +102,9 @@
     <ClInclude Include="DAESCipherSet.h">
       <Filter>File di intestazione\Cryptography</Filter>
     </ClInclude>
+    <ClInclude Include="DJson.h">
+      <Filter>File di intestazione\Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DBlas.cpp">
@@ -167,5 +170,11 @@
     <ClCompile Include="DAESCipherSet.cpp">
       <Filter>File di origine\Cryptography</Filter>
     </ClCompile>
+    <ClCompile Include="DJson.cpp">
+      <Filter>File di origine\Utility</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

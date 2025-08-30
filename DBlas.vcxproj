@@ -71,7 +71,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ExecutablePath>C:\Boost;$(ExecutablePath)</ExecutablePath>
+    <ExecutablePath>C:\Users\anton\Documents\Visual Studio 2022\Progetti\Packages\nlohmann;C:\Boost;$(ExecutablePath)</ExecutablePath>
+    <IncludePath>C:\Users\anton\Documents\Visual Studio 2022\Progetti\Packages\nlohmann;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -114,7 +115,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <DisableSpecificWarnings>4250</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4250;4267;26819</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>C:\Boost;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -158,6 +159,7 @@
     <ClInclude Include="DCryptoTestTools.h" />
     <ClInclude Include="DError.h" />
     <ClInclude Include="DFormatConverter.h" />
+    <ClInclude Include="DJson.h" />
     <ClInclude Include="DMemory.h" />
     <ClInclude Include="DNetworkEnum.h" />
     <ClInclude Include="DTCPv4Client.h" />
@@ -184,6 +186,7 @@
     <ClCompile Include="DCryptoTestTools.cpp" />
     <ClCompile Include="DError.cpp" />
     <ClCompile Include="DFormatConverter.cpp" />
+    <ClCompile Include="DJson.cpp" />
     <ClCompile Include="DMemory.cpp" />
     <ClCompile Include="DTCPv4Client.cpp" />
     <ClCompile Include="DTCPv4Server.cpp" />
@@ -195,6 +198,17 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\Cryptopals\Set_02\packages\nlohmann.json.3.12.0\build\native\nlohmann.json.targets" Condition="Exists('..\Cryptopals\Set_02\packages\nlohmann.json.3.12.0\build\native\nlohmann.json.targets')" />
+  </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>Questo progetto fa riferimento a uno o più pacchetti NuGet che non sono presenti in questo computer. Usare lo strumento di ripristino dei pacchetti NuGet per scaricarli. Per altre informazioni, vedere http://go.microsoft.com/fwlink/?LinkID=322105. Il file mancante è {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\Cryptopals\Set_02\packages\nlohmann.json.3.12.0\build\native\nlohmann.json.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\Cryptopals\Set_02\packages\nlohmann.json.3.12.0\build\native\nlohmann.json.targets'))" />
+  </Target>
 </Project>
