@@ -7,6 +7,8 @@
 //---------------------------------------------------------------------------------------
 // Define
 #define MAXBLOCKLENGTH 128
+#define MAXANSWERLENGTH 4096
+//#define CHALLENGE_12
 //---------------------------------------------------------------------------------------
 // Namespace
 using namespace std;
@@ -423,15 +425,23 @@ DMode DCryptoAnalysis::detect_block_cipher_mode(string IPAddress, uint16_t Port,
 {
 	// Dichiara un oggetto per la conversione di formati
 	DFormatConverter Converter;
-
+#ifdef CHALLENGE_12
 	// Dichiara e alloca la memoria per la sonda
 	pair<uint8_t*, uint32_t>Probe;
 	Probe.first = allocate_memory<uint8_t>(BlockLength * 2);
 	Probe.second = BlockLength * 2; 
 
 	// Riempie la sonda con il carattere A
-	memset(Probe.first, 'A', BlockLength * 2);
+	memset(Probe.first, '.', BlockLength * 2);
+#else
+	// Dichiara e alloca la memoria per la sonda
+	pair<uint8_t*, uint32_t>Probe;
+	Probe.first = allocate_memory<uint8_t>(BlockLength * 3);
+	Probe.second = BlockLength * 3;
 
+	// Riempie la sonda con il carattere A
+	memset(Probe.first, '.', BlockLength * 3);
+#endif
 	// Converte il contenuto della sonda in base64 URL
 	std::string Request = Converter.binary_to_base64(Probe, true, true).first;
 
@@ -449,9 +459,40 @@ DMode DCryptoAnalysis::detect_block_cipher_mode(string IPAddress, uint16_t Port,
 
 	// Converte la risposta in binario
 	pair<uint8_t*, uint32_t> Cipher = Converter.base64_to_binary(Answer, true, true);
-
-	// Deterrmina la modalità di cifratura
+#if CHALLENGE_12
+	// Determina la modalità di cifratura
 	return detect_block_cipher_mode(Cipher, BlockLength);
+#else
+	// Determina la modalità di cifratura
+	if (find_identical_adjacent_blocks(Cipher, BlockLength)) return ECB;
+	else return UMD;
+#endif
+}
+//---------------------------------------------------------------------------------------
+bool DCryptoAnalysis::find_identical_adjacent_blocks(const pair<uint8_t*, uint32_t> Text, const uint32_t BlockLength)
+{
+	// Dichiara i blocchi da confrontare
+	pair<uint8_t*, uint32_t>Block1;
+	pair<uint8_t*, uint32_t>Block2;
+
+	// Assegna la lunghezza
+	Block1.second = BlockLength;
+	Block2.second = BlockLength;
+
+	bool Found = false;
+
+	// Ciclo principale
+	for (uint32_t i = 0; i < Text.second - (BlockLength * 2); i++)
+	{
+		Block1.first = &(Text.first[i * BlockLength]);
+		Block2.first = &(Text.first[i * BlockLength + BlockLength]);
+		if (get_Hamming_distance(Block1, Block2) == 0)
+		{
+			Found = true;
+			break;
+		}
+	}
+	return Found;
 }
 //---------------------------------------------------------------------------------------
 double* DCryptoAnalysis::get_character_frequency(const std::pair<uint8_t*, uint32_t> Text)
@@ -504,6 +545,77 @@ uint32_t DCryptoAnalysis::get_cipher_cookie_length(string IPAddress, uint16_t Po
 	pair<uint8_t*, uint32_t> Cipher = Converter.base64_to_binary(Answer, true, true);
 
 	return Cipher.second - BlockLength;
+}
+//---------------------------------------------------------------------------------------
+pair<uint32_t, uint32_t> DCryptoAnalysis::get_cipher_cookie_and_prefix_length(string IPAddress, uint16_t Port, uint32_t BlockLength)
+{
+	// Dichiara l'oggetto per le conversioni di formato di dati
+	DFormatConverter Converter;
+
+	// Dichiara l'oggetto per interrogare il server
+	DTCPv4Client Client;
+
+	// Dichiara e inizializza il massimo spazio da riservare alla sonda
+	uint32_t ProbeLength = BlockLength * 3;
+
+	// Alloca lo spazio massimo per la sonda
+	pair<uint8_t*, uint32_t>Probe;
+	Probe.first = allocate_memory<uint8_t>(ProbeLength);
+
+	// Dichiara la Lmin
+	uint32_t Length = MAXANSWERLENGTH;
+
+	// Indice iniziale della sonda
+	uint32_t ProbeIndex;
+
+	// Indice del blocco
+	uint32_t BlockIndex;
+
+	// Vera se trova due blocchi contigui uguali
+	bool Found;
+
+	// Ciclo principale
+	for (uint32_t i = 0; i < ProbeLength; i++)
+	{
+		// Aggiorna la sonda
+		Probe.first[i] = '.';
+		Probe.second = i + 1;
+
+		// Converte il messaggio in base64
+		string CodedMessage = Converter.binary_to_base64(Probe, true, true).first;
+
+		// Attiva la connessione
+		Client.connect(IPAddress, Port);
+
+		// Invia il messaggio
+		Client.send(CodedMessage);
+
+		// Legge la risposta
+		string CodedAnswer = Client.read_until_close();
+
+		// Converte la risposta
+		std::pair<uint8_t*, uint32_t> Answer = Converter.base64_to_binary(CodedAnswer, true, true);
+
+		// Assegna la lunghezza minima
+		if (Length > Answer.second)
+		{
+			Length = Answer.second;
+			ProbeIndex = Probe.second;
+		}
+
+		// Verifica che vi siano due blocchi uguali successivi
+		tie(Found, BlockIndex) = get_identical_adjacent_blocks(Answer, BlockLength);
+		if (Found)break;
+	}
+
+	// Lunghezza del prefisso
+	uint32_t PrefixLength = (ProbeIndex + 3) * BlockLength - Probe.second;
+
+	// Lunghezza del testo
+	uint32_t PlainLength = Length - PrefixLength - (ProbeIndex + 1);
+
+	// Restituisce i risultati
+	return make_pair(PrefixLength, PlainLength);
 }
 //---------------------------------------------------------------------------------------
 double DCryptoAnalysis::get_Hamming_distance(const pair<uint8_t*, uint32_t> Text, uint32_t BlockLength)
@@ -575,6 +687,39 @@ uint32_t DCryptoAnalysis::get_Hamming_distance(const pair<uint8_t*, uint32_t> Te
 
 	// Restituisce la distanza di Hamming calcolata
 	return Distance;
+}
+//---------------------------------------------------------------------------------------
+pair<bool, uint32_t> DCryptoAnalysis::get_identical_adjacent_blocks(const pair<uint8_t*, uint32_t> Text, const uint32_t BlockLength)
+{
+	// Indice del primo blocco identico
+	uint32_t Index = 0;
+
+	// Dichiara i blocchi da confrontare
+	pair<uint8_t*, uint32_t>Block1;
+	pair<uint8_t*, uint32_t>Block2;
+
+	// Assegna la lunghezza
+	Block1.second = BlockLength;
+	Block2.second = BlockLength;
+
+	bool Found = false;
+
+	// Calcola il numero dei blocchi
+	uint32_t BlockNo = Text.second / BlockLength;
+
+	// Ciclo principale
+	for (uint32_t i = 0; i < BlockNo-3; i++)
+	{
+		Block1.first = &(Text.first[i * BlockLength]);
+		Block2.first = &(Text.first[i * BlockLength + BlockLength]);
+		if (get_Hamming_distance(Block1, Block2) == 0)
+		{
+			Found = true;
+			Index = i;
+			break;
+		}
+	}
+	return make_pair(Found, Index);
 }
 //---------------------------------------------------------------------------------------
 double DCryptoAnalysis::get_language_score(const pair<uint8_t*, uint32_t> Text,

@@ -30,10 +30,13 @@ namespace blas::cryptography::analysis
 		cipher::DMode                        detect_block_cipher_mode(std::filesystem::path Cipher, const uint32_t BlockLength);
 		cipher::DMode                        detect_block_cipher_mode(const std::pair<uint8_t*, uint32_t> Cipher, const uint32_t BlockLength);
 		cipher::DMode                        detect_block_cipher_mode(std::string IPAddress, uint16_t Port, uint32_t BlockLength);
+		bool                                 find_identical_adjacent_blocks(const std::pair<uint8_t*, uint32_t> Text, const uint32_t BlockLength);
 		double*                              get_character_frequency(const std::pair<uint8_t*, uint32_t> Text);
 		uint32_t                             get_cipher_cookie_length(std::string IPAddress, uint16_t Port, uint32_t BlockLength);
+		std::pair<uint32_t, uint32_t>        get_cipher_cookie_and_prefix_length(std::string IPAddress, uint16_t Port, uint32_t BlockLength);
 		double                               get_Hamming_distance(const std::pair<uint8_t*, uint32_t> Text, uint32_t BlockLength);
 		uint32_t                             get_Hamming_distance(const std::pair<uint8_t*, uint32_t> Text1, const std::pair<uint8_t*, uint32_t> Text2);
+		std::pair<bool, uint32_t>            get_identical_adjacent_blocks(const std::pair<uint8_t*, uint32_t> Text, const uint32_t BlockLength);
 		double                               get_language_score(const std::pair<uint8_t*, uint32_t> Text, const double* Language);
 	protected:
 	private:

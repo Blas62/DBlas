@@ -7,6 +7,24 @@
 using namespace blas::utility::data_format;
 using namespace nlohmann;
 using namespace std;
+//-----------------------------------------------------------------------------------
+const std::string DJson::get_object()
+{
+	try
+	{
+		if (!Object.empty())
+		{
+			std::string String = Object.dump();
+			return String;
+		}
+		else throw std::invalid_argument("Empty or non-existent key");
+	}
+	catch (std::exception& e)
+	{
+		set_error(STDERROR, e.what());
+	}
+}
+
 //---------------------------------------------------------------------------------------
 std::string DJson::get_object(int Indent)
 {
@@ -14,7 +32,6 @@ std::string DJson::get_object(int Indent)
 	{
 		if (!Object.empty()) return Object.dump(Indent);
 		else throw std::invalid_argument("Empty or non-existent key");
-
 	}
 	catch (std::exception& e)
 	{

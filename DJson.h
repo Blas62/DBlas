@@ -58,11 +58,6 @@ namespace blas::utility::data_format
 		Object = nlohmann::json::object();
 	}
 	//-----------------------------------------------------------------------------------
-	inline const std::string DJson::get_object()
-	{
-		return get_object(0);
-	}
-	//-----------------------------------------------------------------------------------
 	inline bool DJson::is_empty()
 	{
 		return Object.empty();

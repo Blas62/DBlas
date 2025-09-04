@@ -195,50 +195,173 @@ pair<uint8_t*, uint32_t> attack::DCryptoAttack::byte_at_a_time_to_block_cipher(s
 
 	// Libera la memoria
 	deallocate_memory(Probe.first);
-
+	/*
+	// Elimina il padding
+	uint32_t Shift = Plain.second - PlainLength - 1;
+	memmove(Plain.first, Plain.first + Shift, PlainLength);
+	Plain.first[PlainLength] = 0;
+	Plain.second = PlainLength;
+	*/
 	// Restituisce il decrittato
 	return Plain;
 
 	// TODO: rendere completo l'attacco ponendo le prime due fasi di analisi all'interno 
 	// di questa funzione
-	
-/*
+}
+//---------------------------------------------------------------------------------------
+pair<uint8_t*, uint32_t> attack::DCryptoAttack::byte_at_a_time_to_block_cipher_with_prefix(string IPAddress, uint16_t Port, uint32_t BlockLength)
+{
+	// Dichiara gli oggetti per la conversione di formati, l'analisi e la trasmissione dei dati
+	DFormatConverter Converter;
+	analysis::DCryptoAnalysis Analyzer;
+	DTCPv4Client Client;
+
+	// Dichiara la variabile per lunghezza del prefisso
+	uint32_t PrefixLength;
+
+	// Dichiara la variabile per la lunghezza del testo in chiaro
+	uint32_t PlainLength;
+
+	// Dichiara la variabile contenente il testo in chiaro
+	pair<uint8_t*, uint32_t>Plain;
+
+	// Dichiara la variabile contenente la sonda
+	pair<uint8_t*, uint32_t>Probe;
+
+	// Dichiara la variabile contenente la stringa di riepimento del prefisso
+	pair<uint8_t*, uint32_t>Fill;
+
+	// Determina la lunghezza del prefisso e del cookie in chiaro
+	tie(PrefixLength, PlainLength) = Analyzer.get_cipher_cookie_and_prefix_length(IPAddress, Port, BlockLength);
+
+	// Calcola la lunghezza del riempimento del blocco del prefisso
+	Fill.second = BlockLength - PrefixLength % BlockLength;
+
+	// Alloca la memoria per il riempimento e lo riempie con'+'
+	Fill.first = allocate_memory<uint8_t>(Fill.second);
+	memset(Fill.first, '+', Fill.second);
+
+	// Dichiara e calcola il numero complessivo di blocchi del prefisso più il riempimento
+	uint32_t PrefixBlockNo = (Fill.second + PrefixLength) / BlockLength;
+
+	// Calcola il numero di blocchi del testo in chiaro
+	uint32_t PlainBlockNo = PlainLength / BlockLength;
+	if (PlainLength % BlockLength)PlainBlockNo++;
+
+	// Calcola lo spazio necessario per il testo in chiaro più padding
+	Plain.second = PlainBlockNo * BlockLength;
+
+	// Alloca la memoria per il testo in chiaro e lo riempie con '.'
+	Plain.first = allocate_memory<uint8_t>(Plain.second);
+	memset(Plain.first, '.', Plain.second);
+
+	// Calcola lo spazio necessario per la sonda
+	Probe.second = Plain.second - 1;
+
+	// Alloca la memoria per la sonda e lo riempie con '.'
+	Probe.first = allocate_memory<uint8_t>(Probe.second);
+	memset(Probe.first, '.', Probe.second);
+
+	// Dichiara e calcola gli indici da confrontare
+	uint32_t Index1 = (PlainBlockNo + PrefixBlockNo - 1) * BlockLength;
+	uint32_t Index2 = (2 * PlainBlockNo + PrefixBlockNo - 1) * BlockLength;
 
 	// Ciclo principale
-	for (uint32_t i = 0; i < Length; i++)
+	for (uint32_t i = 0; i < PlainLength; i++)
 	{
+		// Dichiara e inizializza un carattere
 		uint8_t Char = 0;
+
+		// Dichiara la variabile per il messaggio
+		std::pair<uint8_t*, uint32_t> Message;
+
+		// Dichiara la variabile per il messaggio in base64
+		string CodedMessage;
+
+		// Dichiara la variabile per la risposta base64
+		string CodedAnswer;
+
+		// Dichiara la variabile per la risposta decodificata
+		std::pair<uint8_t*, uint32_t> Answer;
+
+		// Dichiara i due blocchi per il confronto
+		std::pair<uint8_t*, uint32_t> PlainBlock;
+		std::pair<uint8_t*, uint32_t> ProbeBlock;
+
+		// Ciclo di confronto per scoprire il carattere valido
 		for (uint32_t j = 0; j < 256; j++)
 		{
-			// Assegna il carattere da confrontare
-			Plain.first[Length - 1] = Char;
+			// Imposta il testo in chiaro con il carattere da confrontare
+			Plain.first[Plain.second - 1] = Char;
 
 			// Genera il messaggio
-			std::pair<uint8_t*, uint32_t> Message = Plain + Probe + Test;
+			Message = Fill + Plain + Probe;
 
-			// Invia il messaggio e ricevi la risposta 
-#ifdef DEBUG
-			std::pair<uint8_t*, uint32_t> Answer = Message + Test;
-			std::pair<uint8_t*, uint32_t> PlainBlock = make_pair(&Answer.first[Index1], BlockLength);
-			std::pair<uint8_t*, uint32_t> ProbeBlock = make_pair(&Answer.first[Index2], BlockLength);
-#endif
-			if (!Analyzer.get_Hamming_distance(PlainBlock,ProbeBlock))break;
-			Char++;
+			// Converte il messaggio in base64
+			CodedMessage = Converter.binary_to_base64(Message, true, true).first;
+
+			// Attiva la connessione
+			Client.connect(IPAddress, Port);
+
+			// Invia il messaggio
+			Client.send(CodedMessage);
+
+			// Legge la risposta
+			CodedAnswer = Client.read_until_close();
+
+			// Converte la risposta
+			Answer = Converter.base64_to_binary(CodedAnswer, true, true);
+
+			// Seleziona i blocchi da confrontare
+			PlainBlock = make_pair(&Answer.first[Index1], BlockLength);
+			ProbeBlock = make_pair(&Answer.first[Index2], BlockLength);
+
+			// Calcola la distanza di Hamming tra i due blocchi
+			if (!Analyzer.get_Hamming_distance(PlainBlock, ProbeBlock))
+			{
+				// Libera la memoria
+				deallocate_memory(Message.first);
+				deallocate_memory(Answer.first);
+
+				// Stampa il carattere trovato
+				cout << Char;
+
+				// Esce dal ciclo
+				break;
+			}
+			else
+			{
+				// Libera la memoria
+				deallocate_memory(Message.first);
+				deallocate_memory(Answer.first);
+
+				// Incrementa il carattere
+				Char++;
+			}
 		}
-		if (i < (Length - 1))
+		// Se è non stato scoperto l'ultimo carattere
+		if (i < (Plain.second - 1))
 		{
 			// Scorre il chiaro di un posto
-			Plain = shift_to_left(Plain);
+			//for (uint32_t i = 0; i < Plain.second - 1; i++)Plain.first[i] = Plain.first[i + 1];
+			memmove(Plain.first, Plain.first + 1, Plain.second - 1);
 
 			// Accorcia la sonda di un elemento
 			Probe.first[Probe.second - 1] = 0;
 			Probe.second--;
 		}
 	}
+	// Libera la memoria
+	deallocate_memory(Probe.first);
+
+	// Elimina il padding
+	uint32_t Shift = Plain.second - PlainLength - 1;
+	memmove(Plain.first, Plain.first + Shift, PlainLength);
+	Plain.first[PlainLength] = 0;
+	Plain.second = PlainLength;
 
 	// Restituisce il decrittato
 	return Plain;
-*/
 }
 //---------------------------------------------------------------------------------------
 /*
