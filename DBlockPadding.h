@@ -7,7 +7,7 @@
 // Namespace
 namespace blas::cryptography::fundamental_algorithms
 {
-	class DBlockPadding: blas::utility::DError
+	class DBlockPadding: public blas::utility::DError
 	{
 	public:
 		DBlockPadding();

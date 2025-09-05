@@ -33,7 +33,7 @@ uint8_t* DBlockPadding::unpad_block_PKCS7(pair<uint8_t*, uint32_t> Block)
 		// Calcola il valore di padding
 		uint8_t PadValue = Block.first[Block.second - 1];
 
-		// Se è più grande della dimensio ne del blocco lancia una eccezione
+		// Se è più grande della dimensione del blocco lancia una eccezione
 		if (PadValue >= Block.second)throw "invalid pad value";
 
 		// Se l'ultimo byte del padding è diverso lancia una eccezione

@@ -52,6 +52,15 @@ namespace blas
 		}
 		//-------------------------------------------------------------------------------
 		template<class T>
+		void fill_memory(T* Destination, T Filler, size_t Size)
+		{
+			if (Destination != nullptr)
+			{
+				for (size_t i = 0; i < Size; i++)Destination[i] = Filler;
+			}
+		}
+		//-------------------------------------------------------------------------------
+		template<class T>
 		std::pair<T*, uint32_t>operator+(std::pair<T*, uint32_t>a, std::pair<T*, uint32_t>b)
 		{
 			uint32_t Length = a.second + b.second;
