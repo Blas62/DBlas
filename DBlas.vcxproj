@@ -115,7 +115,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <DisableSpecificWarnings>4250;4267;26819</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4250;4267;4715;6255;6387;26819</DisableSpecificWarnings>
       <AdditionalIncludeDirectories>C:\Boost;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>

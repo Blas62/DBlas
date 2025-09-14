@@ -364,6 +364,11 @@ pair<uint8_t*, uint32_t> attack::DCryptoAttack::byte_at_a_time_to_block_cipher_w
 	return Plain;
 }
 //---------------------------------------------------------------------------------------
+pair<uint8_t*, uint32_t> attack::DCryptoAttack::CBC_padding_oracle(string IPAddress, uint16_t Port, uint32_t BlockLength)
+{
+	return std::pair<uint8_t*, uint32_t>();
+}
+//---------------------------------------------------------------------------------------
 /*
 pair<uint8_t*, uint32_t> attack::DCryptoAttack::copy_to_probe(pair<uint8_t*, uint32_t> Array1, pair<uint8_t*, uint32_t> Array2)
 {
