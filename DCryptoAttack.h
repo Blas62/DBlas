@@ -20,7 +20,10 @@ namespace blas::cryptography::attack
 			const double* Language);
 		std::pair<uint8_t*, uint32_t>byte_at_a_time_to_block_cipher(std::string IPAddress, uint16_t Port, uint32_t BlockLength);
 		std::pair<uint8_t*, uint32_t>byte_at_a_time_to_block_cipher_with_prefix(std::string IPAddress, uint16_t Port, uint32_t BlockLength);
-		std::pair<uint8_t*, uint32_t>CBC_padding_oracle(std::string IPAddress, uint16_t Port, uint32_t BlockLength);
+		std::pair<uint8_t*, uint32_t>CBC_padding_oracle(std::string IPAddress, 
+			uint16_t Port, 
+			std::pair<uint8_t*, uint32_t> Cipher, 
+			uint32_t BlockLength);
 	
 	protected:
 		//std::pair<uint8_t*, uint32_t>copy_to_probe(std::pair<uint8_t*, uint32_t>Array1, std::pair<uint8_t*, uint32_t>Array2);

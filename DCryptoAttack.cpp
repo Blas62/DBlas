@@ -364,9 +364,38 @@ pair<uint8_t*, uint32_t> attack::DCryptoAttack::byte_at_a_time_to_block_cipher_w
 	return Plain;
 }
 //---------------------------------------------------------------------------------------
-pair<uint8_t*, uint32_t> attack::DCryptoAttack::CBC_padding_oracle(string IPAddress, uint16_t Port, uint32_t BlockLength)
+pair<uint8_t*, uint32_t> attack::DCryptoAttack::CBC_padding_oracle(string IPAddress, 
+	uint16_t Port, std::pair<uint8_t*, uint32_t> Cipher,
+	uint32_t BlockLength)
 {
-	return std::pair<uint8_t*, uint32_t>();
+	// Dichiara il vettore del testo in chiaro
+	std::pair<uint8_t*, uint32_t>Plain;
+
+	// Dichiara l'oggetto client
+	blas::utility::tcp::v4::DTCPv4Client Client;
+
+	// Crea il json per la richiesta
+	blas::utility::data_format::DJson AccountRequest;
+	uint32_t Index = 10;
+	AccountRequest.set("index", Index);
+
+	// Converte il jason in una stringa
+	string Request = AccountRequest.get_object();
+
+	// Converte la stringa in base64URL e la restituisce 
+	blas::utility::DFormatConverter Converter;
+	pair<char*, uint32_t>Message = Converter.binary_to_base64(Request, true, true);
+
+	// Invia la richiesta al server alla porta dell'indirizzo IP del server
+	Client.connect(IPAddress, Port);
+	Client.send(Message.first);
+	string Answer = Client.read_until_close();
+
+	// Converte la risposta
+	pair<uint8_t*, uint32_t>BinaryAnswer = Converter.base64_to_binary(Answer, true, true);
+
+	// Restituisce il risultato
+	return Plain;
 }
 //---------------------------------------------------------------------------------------
 /*
