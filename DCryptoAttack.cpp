@@ -365,37 +365,116 @@ pair<uint8_t*, uint32_t> attack::DCryptoAttack::byte_at_a_time_to_block_cipher_w
 }
 //---------------------------------------------------------------------------------------
 pair<uint8_t*, uint32_t> attack::DCryptoAttack::CBC_padding_oracle(string IPAddress, 
-	uint16_t Port, std::pair<uint8_t*, uint32_t> Cipher,
+	uint16_t Port, pair<uint8_t*, uint32_t> Cookie,
 	uint32_t BlockLength)
 {
 	// Dichiara il vettore del testo in chiaro
-	std::pair<uint8_t*, uint32_t>Plain;
+	pair<uint8_t*, uint32_t>Plain;
 
-	// Dichiara l'oggetto client
-	blas::utility::tcp::v4::DTCPv4Client Client;
+	// Inizializza l'oggetto Json
+	data_format::DJson JsonCookie; 
+	JsonCookie.set((char*)Cookie.first);
 
-	// Crea il json per la richiesta
-	blas::utility::data_format::DJson AccountRequest;
-	uint32_t Index = 10;
-	AccountRequest.set("index", Index);
+	// ottiene l'indice del cookie
+	uint32_t Index = JsonCookie.get<uint32_t>("index");
 
-	// Converte il jason in una stringa
-	string Request = AccountRequest.get_object();
+	// Ottiene il cifrato base64
+	string Base64Cookie = JsonCookie.get<std::string>("cookie");
 
-	// Converte la stringa in base64URL e la restituisce 
-	blas::utility::DFormatConverter Converter;
-	pair<char*, uint32_t>Message = Converter.binary_to_base64(Request, true, true);
+	// Converte il cookie da base64 a binario
+	DFormatConverter Converter;
+	pair<uint8_t*, uint32_t>CipherCookie = Converter.base64_to_binary(Base64Cookie, true, true);
 
-	// Invia la richiesta al server alla porta dell'indirizzo IP del server
-	Client.connect(IPAddress, Port);
-	Client.send(Message.first);
-	string Answer = Client.read_until_close();
+	// Separa il vettore iniziale dal cifrato
+	pair<uint8_t*, uint32_t>InitialVector = DMemory<uint8_t>::get_until(CipherCookie, BlockLength);
+	pair<uint8_t*, uint32_t>Cipher = DMemory<uint8_t>::get_from(CipherCookie, BlockLength);
 
-	// Converte la risposta
-	pair<uint8_t*, uint32_t>BinaryAnswer = Converter.base64_to_binary(Answer, true, true);
+
+	// Calcola il numero dei blocchi e dichiara l'array dove mettere il singolo blocco cifrato
+	uint32_t BlockNo = Cipher.second / BlockLength;
+	pair<uint8_t*, uint32_t>CipherBlock;
+
+	// Ciclo principale
+	for (uint32_t i = 0; i < BlockNo; i++)
+	{
+		// Estrae un blocco dal cifrato
+		CipherBlock = DMemory<uint8_t>::get_from_until(Cipher, i * BlockLength, BlockLength);
+
+		// Decripta il blocco e lo unisce all'array in chiaro mettendolo in un array temporaneo
+		pair<uint8_t*, uint32_t>Temp=blas::utility::DMemory<uint8_t>::merge(Plain, block_CBC_padding_oracle(IPAddress, Port, CipherBlock, Index, BlockLength));
+
+		// Copia il contenuto dell'array temporaneo nell'array in chiaro
+		DMemory<uint8_t>::copy(Temp,Plain);
+
+		// Libera la memoria
+		DMemory<uint8_t>::free(Temp);
+		DMemory<uint8_t>::free(CipherBlock);
+	}
 
 	// Restituisce il risultato
 	return Plain;
+}
+//--------------------------------------------------------------------------------------
+pair<uint8_t*, uint32_t> attack::DCryptoAttack::block_CBC_padding_oracle(string IPAddress, 
+	uint16_t Port, 
+	pair<uint8_t*, uint32_t> CipherBlock, 
+	uint32_t Index, 
+	uint32_t BlockLength)
+{
+	// Dichiara il client
+	tcp::v4::DTCPv4Client Client;
+
+	// Alloca lo spazio per il blocco in chiaro
+	pair<uint8_t*, uint32_t>PlainBlock = DMemory<uint8_t>::allocate(BlockLength);
+
+	// Alloca lo spazio per il vettore iniziale di test
+	pair<uint8_t*, uint32_t>InitialVector = DMemory<uint8_t>::allocate(BlockLength);
+
+	// Crea il json per la richiesta
+	blas::utility::data_format::DJson JsonRequest;
+	JsonRequest.set("index", Index);
+
+	// Ciclo principale di prova
+	for (uint32_t i = 0; i < 256; i++)
+	{
+		// Inizializza l'ultimo carattere del vettore iniziale
+		InitialVector.first[BlockLength - 1] = (uint8_t)i;
+
+		// Unisce il vettore iniziale al blocco da decrittare
+		pair<uint8_t*, uint32_t>Cipher = DMemory<uint8_t>::merge(InitialVector, CipherBlock);
+
+		// Converte i vettore ottenuto in base 64
+		DFormatConverter Converter;
+		std::string CodedCipher = Converter.binary_to_base64(Cipher, true, true).first;
+
+		// Inserisce il risultato nel JSON
+		JsonRequest.set("cookie", CodedCipher);
+
+		// Converte il jason in una stringa
+		string Request = JsonRequest.get_object();
+
+		// Converte la stringa in base64URL e la restituisce 
+		pair<char*, uint32_t>Message = Converter.binary_to_base64(Request, true, true);
+
+		// Invia la richiesta al server alla porta dell'indirizzo IP del server
+		Client.connect(IPAddress, Port);
+		Client.send(Message.first);
+		string Answer = Client.read_until_close();
+
+
+	}
+
+
+
+
+
+
+
+
+
+
+	DMemory<uint8_t>::set(PlainBlock, 'A');
+	return PlainBlock;
 }
 //---------------------------------------------------------------------------------------
 /*

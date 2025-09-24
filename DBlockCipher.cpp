@@ -43,7 +43,7 @@ bool DBlockCipher::check_padding(uint8_t* Block)
 
 		// Se il valore di padding è maggiore della lunghezza dal
 		// blocco, lancia una eccezione
-		if (PadValue >= ByteNb)throw "invalid pad value or no padding";
+		if (PadValue > ByteNb)throw "invalid pad value or no padding";
 
 		// Se il valore dell'i-esimo byte di padding non è 
 		// uguale al valore di padding, lancia una eccezione
@@ -54,8 +54,11 @@ bool DBlockCipher::check_padding(uint8_t* Block)
 
 		// Se il valore dell'ultimo byte valido è uguale al 
 		// valore di padding lancia una eccezione
-		if (Block[ByteNb - PadValue - 1] == PadValue)throw "excessive padding";
 
+		if (PadValue != ByteNb)
+		{
+			if (Block[ByteNb - PadValue - 1] == PadValue)throw "excessive padding";
+		}
 		// Il padding è corretto e restituisce true
 		return true;
 	}
