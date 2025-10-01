@@ -9,6 +9,7 @@
 // Namespace
 using namespace std;
 using namespace blas::utility;
+using namespace blas::utility::data_format;
 using namespace blas::utility::tcp::v4;
 using namespace blas::cryptography;
 using namespace blas::cryptography::analysis;
@@ -364,12 +365,11 @@ pair<uint8_t*, uint32_t> attack::DCryptoAttack::byte_at_a_time_to_block_cipher_w
 	return Plain;
 }
 //---------------------------------------------------------------------------------------
-pair<uint8_t*, uint32_t> attack::DCryptoAttack::CBC_padding_oracle(string IPAddress, 
-	uint16_t Port, pair<uint8_t*, uint32_t> Cookie,
-	uint32_t BlockLength)
+pair<uint8_t*, uint32_t> attack::DCryptoAttack::CBC_padding_oracle(const pair<string, uint16_t>Oracle, uint32_t BlockLength, string Cookie)
 {
 	// Dichiara il vettore del testo in chiaro
 	pair<uint8_t*, uint32_t>Plain;
+/*
 
 	// Inizializza l'oggetto Json
 	data_format::DJson JsonCookie; 
@@ -410,12 +410,47 @@ pair<uint8_t*, uint32_t> attack::DCryptoAttack::CBC_padding_oracle(string IPAddr
 		DMemory<uint8_t>::free(Temp);
 		DMemory<uint8_t>::free(CipherBlock);
 	}
-
+*/
 	// Restituisce il risultato
 	return Plain;
 }
+//---------------------------------------------------------------------------------------
+bool attack::DCryptoAttack::ask_padding_oracle(const pair<string, uint16_t> Oracle, uint32_t BlockLength, pair<uint8_t*, uint32_t> CipherBlock, pair<uint8_t*, uint32_t> Vector)
+{
+	// Restituisce true se il padding è corretto, false se è sbagliato
+	// Genera il cookie
+	std::string Cookie = (char*)DMemory<uint8_t>::merge(Vector, CipherBlock).first;
+
+	// Crea il json per la richiesta
+	DJson JsonRequest;
+	uint32_t Index = 1;
+	JsonRequest.set("index", Index);
+	JsonRequest.set("cookie", Cookie);
+
+	// Converte il jason in una stringa
+	string Request = JsonRequest.get_object();
+
+	// Converte la stringa in base64URL e la restituisce 
+	DFormatConverter Converter;
+	pair<char*, uint32_t>Message = Converter.binary_to_base64(Request, true, true);
+
+	// Dichiara il client
+	tcp::v4::DTCPv4Client Client;
+
+	// Invia la richiesta alla porta dell'indirizzo IP del server
+	Client.connect(Oracle);
+	Client.send(Message.first);
+	string Answer = Client.read_until_close();
+
+	size_t Found = Answer.find("401");
+
+	// Esamina la risposta
+	if (Found != string::npos) return false;
+	else return true;
+}
 //--------------------------------------------------------------------------------------
-pair<uint8_t*, uint32_t> attack::DCryptoAttack::block_CBC_padding_oracle(string IPAddress, 
+/*
+pair<uint8_t*, uint32_t> attack::DCryptoAttack::block_CBC_padding_oracle(string IPAddress,
 	uint16_t Port, 
 	pair<uint8_t*, uint32_t> CipherBlock, 
 	uint32_t Index, 
@@ -476,6 +511,7 @@ pair<uint8_t*, uint32_t> attack::DCryptoAttack::block_CBC_padding_oracle(string 
 	DMemory<uint8_t>::set(PlainBlock, 'A');
 	return PlainBlock;
 }
+*/
 //---------------------------------------------------------------------------------------
 /*
 pair<uint8_t*, uint32_t> attack::DCryptoAttack::copy_to_probe(pair<uint8_t*, uint32_t> Array1, pair<uint8_t*, uint32_t> Array2)

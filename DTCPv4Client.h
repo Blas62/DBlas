@@ -14,6 +14,7 @@ namespace blas::utility::tcp::v4
 		DTCPv4Client();
 		~DTCPv4Client();
 		void connect(const std::string& Host, const uint32_t Port);
+		void connect(const std::pair<std::string, uint16_t>Server);
 		std::size_t send(const std::string& data);
 		std::size_t read_some(std::string& out);
 		std::string read_until_close();
@@ -36,6 +37,11 @@ namespace blas::utility::tcp::v4
 	inline DTCPv4Client::~DTCPv4Client()
 	{
 		close();
+	}
+	//-----------------------------------------------------------------------------------
+	inline void DTCPv4Client::connect(const std::pair<std::string, uint16_t>Server)
+	{
+		connect(Server.first, Server.second);
 	}
 	//-----------------------------------------------------------------------------------
 }

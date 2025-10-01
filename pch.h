@@ -16,5 +16,6 @@
 #include <system_error>
 #include <cstdlib>
 #include <iostream>
+#include <string>
 
 #endif //PCH_H
