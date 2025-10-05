@@ -19,7 +19,7 @@ void DError::set_error(uint8_t NewCode, string NewMessage)
 	ErrorMessage = NewMessage;
 }
 //---------------------------------------------------------------------------------------
-void DError::clear()
+void DError::clear_error()
 {
 	ErrorCode = 0;
 	ErrorMessage = "";

@@ -415,11 +415,15 @@ pair<uint8_t*, uint32_t> attack::DCryptoAttack::CBC_padding_oracle(const pair<st
 	return Plain;
 }
 //---------------------------------------------------------------------------------------
-bool attack::DCryptoAttack::ask_padding_oracle(const pair<string, uint16_t> Oracle, uint32_t BlockLength, pair<uint8_t*, uint32_t> CipherBlock, pair<uint8_t*, uint32_t> Vector)
+bool attack::DCryptoAttack::ask_CBC_padding_oracle(const pair<string, uint16_t> Oracle, uint32_t BlockLength, pair<uint8_t*, uint32_t> CipherBlock, pair<uint8_t*, uint32_t> Vector)
 {
 	// Restituisce true se il padding è corretto, false se è sbagliato
-	// Genera il cookie
-	std::string Cookie = (char*)DMemory<uint8_t>::merge(Vector, CipherBlock).first;
+	// Genera il cookie binario
+	pair<uint8_t*, uint32_t>BinaryCookie = DMemory<uint8_t>::merge(Vector, CipherBlock);
+
+	// Converte il cookie binario in base 64 URL
+	DFormatConverter Converter;
+	string Cookie = Converter.binary_to_base64(BinaryCookie, true, true).first;
 
 	// Crea il json per la richiesta
 	DJson JsonRequest;
@@ -431,7 +435,6 @@ bool attack::DCryptoAttack::ask_padding_oracle(const pair<string, uint16_t> Orac
 	string Request = JsonRequest.get_object();
 
 	// Converte la stringa in base64URL e la restituisce 
-	DFormatConverter Converter;
 	pair<char*, uint32_t>Message = Converter.binary_to_base64(Request, true, true);
 
 	// Dichiara il client
@@ -447,6 +450,34 @@ bool attack::DCryptoAttack::ask_padding_oracle(const pair<string, uint16_t> Orac
 	// Esamina la risposta
 	if (Found != string::npos) return false;
 	else return true;
+}
+//--------------------------------------------------------------------------------------
+uint8_t attack::DCryptoAttack::word_CBC_padding_oracle(const pair<string, uint16_t> Oracle, uint32_t BlockLength, pair<uint8_t*, uint32_t> CipherBlock, pair<uint8_t*, uint32_t> Vector, uint32_t Index)
+{
+	uint8_t Word = 155;
+	for (uint16_t i = 0; i < 256; i++)
+	{
+		Vector.first[Index] = Word;
+		if (!ask_CBC_padding_oracle(Oracle, BlockLength, CipherBlock, Vector)) Word++;
+		else break;
+		/*
+		{
+			uint8_t Check = 0;
+			if (Index == 0)break;
+			for (uint16_t j = 0; j < 256; j++)
+			{
+				Vector.first[Index - 1] = j;
+				if (!ask_CBC_padding_oracle(Oracle, BlockLength, CipherBlock, Vector)) Check++;
+				else
+				{
+					Word++;
+					break;
+				}
+			}
+		}
+		*/
+	}
+	return Word;
 }
 //--------------------------------------------------------------------------------------
 /*

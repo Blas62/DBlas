@@ -19,7 +19,7 @@ namespace blas
 		public:
 			DError();
 			~DError();
-			virtual void clear();
+			virtual void clear_error();
 			virtual uint8_t get_error_code();
 			virtual std::string get_error_message();
 			virtual bool is_error();
@@ -33,7 +33,7 @@ namespace blas
 		//-------------------------------------------------------------------------------
 		inline DError::DError()
 		{
-			clear();
+			clear_error();
 		}
 		//-------------------------------------------------------------------------------
 		inline DError::~DError()
