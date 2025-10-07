@@ -365,35 +365,34 @@ pair<uint8_t*, uint32_t> attack::DCryptoAttack::byte_at_a_time_to_block_cipher_w
 	return Plain;
 }
 //---------------------------------------------------------------------------------------
-pair<uint8_t*, uint32_t> attack::DCryptoAttack::CBC_padding_oracle(const pair<string, uint16_t>Oracle, uint32_t BlockLength, string Cookie)
+pair<uint8_t*, uint32_t> attack::DCryptoAttack::CBC_padding_oracle(const pair<string, uint16_t>Oracle, uint32_t BlockLength, string Base64Cookie)
 {
 	// Dichiara il vettore del testo in chiaro
 	pair<uint8_t*, uint32_t>Plain;
-/*
+
+	// Converte il cookie in binario
+	DFormatConverter Converter;
+	pair<uint8_t*, uint32_t>BinaryCookie = Converter.base64_to_binary(Base64Cookie);
 
 	// Inizializza l'oggetto Json
-	data_format::DJson JsonCookie; 
-	JsonCookie.set((char*)Cookie.first);
+	data_format::DJson JsonCookie;
+	JsonCookie.set((char*)BinaryCookie.first);
 
 	// ottiene l'indice del cookie
-	uint32_t Index = JsonCookie.get<uint32_t>("index");
+	uint32_t CookieIndex = JsonCookie.get<uint32_t>("index");
 
 	// Ottiene il cifrato base64
-	string Base64Cookie = JsonCookie.get<std::string>("cookie");
-
-	// Converte il cookie da base64 a binario
-	DFormatConverter Converter;
-	pair<uint8_t*, uint32_t>CipherCookie = Converter.base64_to_binary(Base64Cookie, true, true);
+	pair<uint8_t*, uint32_t>CipherCookie = Converter.base64_to_binary(JsonCookie.get<std::string>("cookie"), true, true);
 
 	// Separa il vettore iniziale dal cifrato
 	pair<uint8_t*, uint32_t>InitialVector = DMemory<uint8_t>::get_until(CipherCookie, BlockLength);
 	pair<uint8_t*, uint32_t>Cipher = DMemory<uint8_t>::get_from(CipherCookie, BlockLength);
 
-
 	// Calcola il numero dei blocchi e dichiara l'array dove mettere il singolo blocco cifrato
 	uint32_t BlockNo = Cipher.second / BlockLength;
 	pair<uint8_t*, uint32_t>CipherBlock;
 
+/*
 	// Ciclo principale
 	for (uint32_t i = 0; i < BlockNo; i++)
 	{
@@ -454,147 +453,12 @@ bool attack::DCryptoAttack::ask_CBC_padding_oracle(const pair<string, uint16_t> 
 //--------------------------------------------------------------------------------------
 uint8_t attack::DCryptoAttack::word_CBC_padding_oracle(const pair<string, uint16_t> Oracle, uint32_t BlockLength, pair<uint8_t*, uint32_t> CipherBlock, pair<uint8_t*, uint32_t> Vector, uint32_t Index)
 {
-	uint8_t Word = 155;
+	uint8_t Word = 0;
 	for (uint16_t i = 0; i < 256; i++)
 	{
 		Vector.first[Index] = Word;
 		if (!ask_CBC_padding_oracle(Oracle, BlockLength, CipherBlock, Vector)) Word++;
 		else break;
-		/*
-		{
-			uint8_t Check = 0;
-			if (Index == 0)break;
-			for (uint16_t j = 0; j < 256; j++)
-			{
-				Vector.first[Index - 1] = j;
-				if (!ask_CBC_padding_oracle(Oracle, BlockLength, CipherBlock, Vector)) Check++;
-				else
-				{
-					Word++;
-					break;
-				}
-			}
-		}
-		*/
 	}
 	return Word;
 }
-//--------------------------------------------------------------------------------------
-/*
-pair<uint8_t*, uint32_t> attack::DCryptoAttack::block_CBC_padding_oracle(string IPAddress,
-	uint16_t Port, 
-	pair<uint8_t*, uint32_t> CipherBlock, 
-	uint32_t Index, 
-	uint32_t BlockLength)
-{
-	// Dichiara il client
-	tcp::v4::DTCPv4Client Client;
-
-	// Alloca lo spazio per il blocco in chiaro
-	pair<uint8_t*, uint32_t>PlainBlock = DMemory<uint8_t>::allocate(BlockLength);
-
-	// Alloca lo spazio per il vettore iniziale di test
-	pair<uint8_t*, uint32_t>InitialVector = DMemory<uint8_t>::allocate(BlockLength);
-
-	// Crea il json per la richiesta
-	blas::utility::data_format::DJson JsonRequest;
-	JsonRequest.set("index", Index);
-
-	// Ciclo principale di prova
-	for (uint32_t i = 0; i < 256; i++)
-	{
-		// Inizializza l'ultimo carattere del vettore iniziale
-		InitialVector.first[BlockLength - 1] = (uint8_t)i;
-
-		// Unisce il vettore iniziale al blocco da decrittare
-		pair<uint8_t*, uint32_t>Cipher = DMemory<uint8_t>::merge(InitialVector, CipherBlock);
-
-		// Converte i vettore ottenuto in base 64
-		DFormatConverter Converter;
-		std::string CodedCipher = Converter.binary_to_base64(Cipher, true, true).first;
-
-		// Inserisce il risultato nel JSON
-		JsonRequest.set("cookie", CodedCipher);
-
-		// Converte il jason in una stringa
-		string Request = JsonRequest.get_object();
-
-		// Converte la stringa in base64URL e la restituisce 
-		pair<char*, uint32_t>Message = Converter.binary_to_base64(Request, true, true);
-
-		// Invia la richiesta al server alla porta dell'indirizzo IP del server
-		Client.connect(IPAddress, Port);
-		Client.send(Message.first);
-		string Answer = Client.read_until_close();
-
-
-	}
-
-
-
-
-
-
-
-
-
-
-	DMemory<uint8_t>::set(PlainBlock, 'A');
-	return PlainBlock;
-}
-*/
-//---------------------------------------------------------------------------------------
-/*
-pair<uint8_t*, uint32_t> attack::DCryptoAttack::copy_to_probe(pair<uint8_t*, uint32_t> Array1, pair<uint8_t*, uint32_t> Array2)
-{
-	for (uint32_t i = 0; i < Array1.second - 1; i++)Array1.first[i] = Array2.first[i + 1];
-	Array1.first[Array1.second - 1] = 0;
-	Array1.second--;
-	return Array1;
-}
-*/
-//---------------------------------------------------------------------------------------
-/*
-uint32_t attack::DCryptoAttack::get_cookie_length(string IPAddress, uint16_t Port, uint32_t BlockLength)
-{
-	// Dichiara un oggetto per la conversione di formati
-	DFormatConverter Converter;
-
-	// Dichiara e alloca la memoria per la sonda
-	pair<uint8_t*, uint32_t>Probe;
-	Probe.first = allocate_memory<uint8_t>(BlockLength);
-	Probe.second = BlockLength;
-
-	// Riempie la sonda con il carattere A
-	memset(Probe.first, 'A', BlockLength);
-
-	// Converte il contenuto della sonda in base64 URL
-	std::string Request = Converter.binary_to_base64(Probe, true, true).first;
-
-	// Dichiara e inizializza il client 
-	DTCPv4Client Client;
-
-	// Attiva la connessione
-	Client.connect(IPAddress, Port);
-
-	// Invia la richiesta al server
-	Client.send(Request);
-
-	// Riceve la risposta
-	string Answer = Client.read_until_close();
-
-	// Converte la risposta in binario
-	pair<uint8_t*, uint32_t> Cipher = Converter.base64_to_binary(Answer, true, true);
-
-	return Cipher.second - BlockLength;
-}
-*/
-//---------------------------------------------------------------------------------------
-/*
-pair<uint8_t*, uint32_t> attack::DCryptoAttack::shift_to_left(pair<uint8_t*, uint32_t> Array)
-{
-	// Sposta i byte del risultato di un posto
-	for (uint32_t i = 0; i < Array.second - 1; i++)Array.first[i] = Array.first[i + 1];
-	return Array;
-}
-*/    
